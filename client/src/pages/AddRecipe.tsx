@@ -13,7 +13,6 @@ export default function AddRecipe() {
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<'input' | 'review'>('input')
   const [url, setUrl] = useState('')
-  const [caption, setCaption] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [extractError, setExtractError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -21,14 +20,14 @@ export default function AddRecipe() {
   const [thumbnailUrl, setThumbnailUrl] = useState('')
 
   const handleExtract = async () => {
-    if (!url && !caption) {
-      setExtractError('Please provide an Instagram URL or paste the recipe caption')
+    if (!url) {
+      setExtractError('Please paste an Instagram reel URL')
       return
     }
     setExtracting(true)
     setExtractError('')
     try {
-      const extracted = await extractRecipe(url, caption)
+      const extracted = await extractRecipe(url, '')
       if (extracted.error) {
         setExtractError(extracted.error)
       } else {
@@ -315,14 +314,13 @@ export default function AddRecipe() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Add Recipe from Instagram</h1>
+    <div className="max-w-lg mx-auto">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Add Recipe</h1>
       <p className="text-gray-500 mb-8">
-        Paste an Instagram reel URL and the recipe caption — Claude AI will extract everything for
-        you.
+        Paste an Instagram reel URL and we'll pull the recipe automatically.
       </p>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
         <div>
           <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
             <Instagram className="w-4 h-4 text-pink-500" />
@@ -332,27 +330,11 @@ export default function AddRecipe() {
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleExtract()}
             placeholder="https://www.instagram.com/reel/..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            autoFocus
           />
-          <p className="text-xs text-gray-400 mt-1">Stored as a link back to the original reel</p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Recipe Caption / Text{' '}
-            <span className="text-gray-400 font-normal">(paste from the reel)</span>
-          </label>
-          <textarea
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            rows={8}
-            placeholder={`Creamy Pasta Carbonara 🍝\n\nIngredients:\n- 200g spaghetti\n- 3 egg yolks\n- 100g pancetta\n...`}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
-          />
-          <p className="text-xs text-gray-400 mt-1">
-            Tip: tap the caption in Instagram to expand it, then long-press to copy all the text
-          </p>
         </div>
 
         {extractError && (
@@ -364,11 +346,11 @@ export default function AddRecipe() {
 
         <button
           onClick={handleExtract}
-          disabled={extracting || (!url && !caption)}
+          disabled={extracting || !url}
           className="w-full flex items-center justify-center gap-2 bg-brand-600 text-white py-3 rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50"
         >
           <Wand2 className="w-5 h-5" />
-          {extracting ? 'Extracting recipe with AI...' : 'Extract Recipe with AI'}
+          {extracting ? 'Fetching recipe...' : 'Get Recipe'}
         </button>
       </div>
     </div>
